@@ -16,11 +16,12 @@ import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.SupportMapFragment
 
 import java.util.*
 
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState!!.keySet().contains(requestLocationUpdateKey))
             mRequestingLocationUpdates = savedInstanceState!!.getBoolean(requestLocationUpdateKey)
         //update UI
+        val mapFragment: SupportMapFragment = supportFragmentManager.findFragmentById(R.id.mapView)
+        mapFragment.getMapAsync(this)
     }
 
     @SuppressLint("NewApi")
