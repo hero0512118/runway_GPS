@@ -4,4 +4,5 @@
     <string name="longitude_label">Longitude</string>
     <string name="no_location_detected">Sorry, no location is detected</string>
     <string name="permission_denied_explanation">No any data is recording</string>
+    <string name="status" >" "</string>
 </resources>

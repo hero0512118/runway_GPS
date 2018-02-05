@@ -21,10 +21,9 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    var mLatitudeLabel :String? = resources.getString(R.string.latitude_label)
-    var mLongitudeLabel  :String? = resources.getString(R.string.longitude_label)
-    var mLatitudeText = findViewById<TextView>(R.id.latitude_text)
-    var mLongitudeText = findViewById<TextView>(R.id.longitude_text)
+    // request_codes
+    private val requestCodeFineLocation = 1
+
     private val permissionGranted = PackageManager.PERMISSION_GRANTED
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,36 +35,44 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        // request_codes
-        val requestCodeFineLocation = 1
-
         // check permission
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
-                != permissionGranted)
+                != permissionGranted) {
             //request permission
-            ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCodeFineLocation)
-        else getLastLocation()
+            requestPermissions()
+            Log.i("test", "request")
+        }
+        else{
+            getLastLocation()
+            Log.i("test", "getLocation")
+        }
     }
 
     @SuppressWarnings("MissingPermission")
     private fun getLastLocation(){
-        var mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        var mLatitudeLabel :String? = resources.getString(R.string.latitude_label)
+        var mLongitudeLabel  :String? = resources.getString(R.string.longitude_label)
+        val mLatitudeText = findViewById<TextView>(R.id.latitude_text)
+        val mLongitudeText = findViewById<TextView>(R.id.longitude_text)
+        val mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mFusedLocationClient.lastLocation
                 .addOnCompleteListener{task ->
                     if (task.isSuccessful){
-                            mLatitudeText.text = String.format(Locale.ENGLISH,"%s : %f",
+                        if (task.result == null)
+                        else{
+                            mLatitudeText.text = String.format(Locale.ENGLISH, "%s : %f",
                                     mLatitudeLabel,
                                     task.result.latitude)
                             mLongitudeText.text = String.format(Locale.ENGLISH, "%s : %f",
                                     mLongitudeLabel,
                                     task.result.longitude)
-                        }else{
-                            //show warning
-                            Log.w("LastLocation:exception", task.exception)
-                            Snackbar.make(findViewById(R.id.status), R.string.no_location_detected,10).show()
                         }
+                    }else{
+                        //show warning
+                        Log.w("LastLocation:exception", task.exception)
+                        Snackbar.make(findViewById(R.id.status), R.string.no_location_detected,10).show()
+                    }
                 }
     }
 
@@ -88,6 +95,11 @@ class MainActivity : AppCompatActivity() {
             } -> return
         }
 
+    }
+
+    private fun requestPermissions(){
+        ActivityCompat.requestPermissions(this,
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), requestCodeFineLocation)
     }
 }
 
