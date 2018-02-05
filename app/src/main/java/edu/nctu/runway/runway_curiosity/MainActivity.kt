@@ -4,16 +4,21 @@ import android.Manifest
 import android.content.Intent
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.provider.Settings
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 
 import com.google.android.gms.location.LocationServices
 
@@ -21,14 +26,25 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    // request_codes
     private val requestCodeFineLocation = 1
-
+    private val REQUEST_LOCATION_UPDATE_KEY = "1"
     private val permissionGranted = PackageManager.PERMISSION_GRANTED
+
+    var mLatitudeLabel :String? = resources.getString(R.string.latitude_label)
+    var mLongitudeLabel  :String? = resources.getString(R.string.longitude_label)
+    var mLatitudeText = findViewById<TextView>(R.id.latitude_text)
+    var mLongitudeText = findViewById<TextView>(R.id.longitude_text)
+    var mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    var mLocationCallback = LocationCallback()
+    var mLocationRequest = LocationRequest()
+    private var mRequestingLocationUpdates : Boolean =false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        if (savedInstanceState!!.keySet().contains(REQUEST_LOCATION_UPDATE_KEY))
+            mRequestingLocationUpdates = savedInstanceState!!.getBoolean(REQUEST_LOCATION_UPDATE_KEY)
+        //update UI
     }
 
     @SuppressLint("NewApi")
@@ -47,15 +63,30 @@ class MainActivity : AppCompatActivity() {
             getLastLocation()
             Log.i("test", "getLocation")
         }
+        mLocationRequest.interval = 10000
+        mLocationRequest.fastestInterval= 5000
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (mRequestingLocationUpdates) mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                mLocationCallback, null)
+    }
+
+    override fun onPause(){
+        super.onPause()
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState.putBoolean(REQUEST_LOCATION_UPDATE_KEY, mRequestingLocationUpdates)
+        super.onSaveInstanceState(outState)
+    }
+
 
     @SuppressWarnings("MissingPermission")
     private fun getLastLocation(){
-        var mLatitudeLabel :String? = resources.getString(R.string.latitude_label)
-        var mLongitudeLabel  :String? = resources.getString(R.string.longitude_label)
-        val mLatitudeText = findViewById<TextView>(R.id.latitude_text)
-        val mLongitudeText = findViewById<TextView>(R.id.longitude_text)
-        val mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mFusedLocationClient.lastLocation
                 .addOnCompleteListener{task ->
                     if (task.isSuccessful){
@@ -67,6 +98,7 @@ class MainActivity : AppCompatActivity() {
                             mLongitudeText.text = String.format(Locale.ENGLISH, "%s : %f",
                                     mLongitudeLabel,
                                     task.result.longitude)
+                            Log.i("test", "updated")
                         }
                     }else{
                         //show warning
@@ -81,10 +113,12 @@ class MainActivity : AppCompatActivity() {
         when(grantResults.size){
             0 -> Log.i("UserPermission","User Interaction was cancelled")
             when(grantResults[0]) {
-                permissionGranted -> getLastLocation()
+                permissionGranted -> {
+                    Snackbar.make(findViewById(R.id.status), R.string.permission_denied_explanation, Snackbar.LENGTH_SHORT)
+                }
                 else -> {
-                    Snackbar.make(findViewById(R.id.status), R.string.permission_denied_explanation, 10)
-                    val onClickListener = View.OnClickListener {
+                    Snackbar.make(findViewById(R.id.status), R.string.permission_denied_explanation, Snackbar.LENGTH_INDEFINITE)
+                    var onClickListener = View.OnClickListener {
                         intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                         intent.data = Uri.fromParts("package", "BuildConfig.APPLICATION_ID", "null")
                         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -94,7 +128,6 @@ class MainActivity : AppCompatActivity() {
                 }
             } -> return
         }
-
     }
 
     private fun requestPermissions(){
