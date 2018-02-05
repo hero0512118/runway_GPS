@@ -27,23 +27,23 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private val requestCodeFineLocation = 1
-    private val REQUEST_LOCATION_UPDATE_KEY = "1"
+    private val requestLocationUpdateKey = "requesting-location-updates"
     private val permissionGranted = PackageManager.PERMISSION_GRANTED
 
     var mLatitudeLabel :String? = resources.getString(R.string.latitude_label)
     var mLongitudeLabel  :String? = resources.getString(R.string.longitude_label)
     var mLatitudeText = findViewById<TextView>(R.id.latitude_text)
     var mLongitudeText = findViewById<TextView>(R.id.longitude_text)
-    var mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    private var mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)!!
     var mLocationCallback = LocationCallback()
     var mLocationRequest = LocationRequest()
-    private var mRequestingLocationUpdates : Boolean =false
+    private var mRequestingLocationUpdates : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (savedInstanceState!!.keySet().contains(REQUEST_LOCATION_UPDATE_KEY))
-            mRequestingLocationUpdates = savedInstanceState!!.getBoolean(REQUEST_LOCATION_UPDATE_KEY)
+        if (savedInstanceState!!.keySet().contains(requestLocationUpdateKey))
+            mRequestingLocationUpdates = savedInstanceState!!.getBoolean(requestLocationUpdateKey)
         //update UI
     }
 
@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
+    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
         if (mRequestingLocationUpdates) mFusedLocationClient.requestLocationUpdates(mLocationRequest,
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
-        outState.putBoolean(REQUEST_LOCATION_UPDATE_KEY, mRequestingLocationUpdates)
+        outState!!.putBoolean(REQUEST_LOCATION_UPDATE_KEY, mRequestingLocationUpdates)
         super.onSaveInstanceState(outState)
     }
 
