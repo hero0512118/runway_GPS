@@ -85,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
-
     @SuppressWarnings("MissingPermission")
     private fun getLastLocation(){
         mFusedLocationClient.lastLocation

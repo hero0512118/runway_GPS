@@ -4,6 +4,7 @@
 .idea
 *.iml
 gradle/
+gradle.properties
 /build
 /captures
 /local.properties
