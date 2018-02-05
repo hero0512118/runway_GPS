@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
-        outState!!.putBoolean(REQUEST_LOCATION_UPDATE_KEY, mRequestingLocationUpdates)
+        outState!!.putBoolean(requestLocationUpdateKey, mRequestingLocationUpdates)
         super.onSaveInstanceState(outState)
     }
 
