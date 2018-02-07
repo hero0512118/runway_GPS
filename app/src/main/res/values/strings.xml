@@ -2,7 +2,11 @@
     <string name="app_name">Runway_curiosity</string>
     <string name="latitude_label">Latitude</string>
     <string name="longitude_label">Longitude</string>
+    <string name="lastUpdateTime_label">Last Update Time</string>
     <string name="no_location_detected">Sorry, no location is detected</string>
-    <string name="permission_denied_explanation">No any data is recording</string>
-    <string name="status" >" "</string>
+    <string name="permission_denied_explanation">No any data is recording.
+        Permission was denied, but is needed for core functionality.</string>
+    <string name="status" >""</string>
+    <string name="permission_rationale">ocation permission is needed for core functionality</string>
+    <string name="settings">Setting</string>
 </resources>
