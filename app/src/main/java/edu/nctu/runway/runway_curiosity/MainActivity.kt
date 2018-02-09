@@ -15,6 +15,7 @@ import android.provider.Settings
 import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.gms.common.api.ApiException
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DateFormat
 
@@ -50,6 +52,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mLongitudeText : TextView
     private lateinit var mLastUpdateTimeText :TextView
 
+    private lateinit var mStartButton :TextView
+    private lateinit var mStopButton :TextView
+
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
     private var mLocationCallback = LocationCallback()
     private var mLocationRequest = LocationRequest()
@@ -70,15 +75,21 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mLastUpdateTimeLabel = resources.getString(R.string.lastUpdateTime_label)
         mLatitudeText = findViewById(R.id.latitude_text)
         mLongitudeText = findViewById(R.id.longitude_text)
+        mLastUpdateTimeText = findViewById(R.id.lastUpdateTime_text)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        lastUpdateTime.text = ""
+        mSettingsClient = LocationServices.getSettingsClient(this)
+        lastUpdateTime_text.text = ""
+        mLastUpdateTime = ""
+        mStartButton = findViewById<TextView>(R.id.start) as Button
+        mStopButton = findViewById<TextView>(R.id.stop) as Button
+
 
         updateValuesFromBundle(savedInstanceState)
         //update UI
 
         val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.mapView) as SupportMapFragment?
-        mapFragment?.getMapAsync(this)
+                .findFragmentById(R.id.mapView) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         setLocationRequest()
         createLocationCallback()
@@ -108,8 +119,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setLocationRequest(){
-        mLocationRequest.interval = 10000
-        mLocationRequest.fastestInterval= 5000
+        mLocationRequest.interval = 50000
+        mLocationRequest.fastestInterval= 1000
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
@@ -269,26 +280,49 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback)
                 .addOnCompleteListener(this) {
                     mRequestingLocationUpdates = false
-                    //setButtonsEnabledState()
+                    setButtonsEnabledState()
                 }
     }
 
+    private fun setButtonsEnabledState() {
+        if (mRequestingLocationUpdates) {
+            mStartButton.isEnabled = false
+            mStopButton.isEnabled = true
+        } else {
+            mStartButton.isEnabled = true
+            mStopButton.isEnabled = false
+        }
+    }
+
+    fun startUpdatesButtonHandler(view: View) {
+        if ((!mRequestingLocationUpdates)) {
+            mRequestingLocationUpdates = true
+            setButtonsEnabledState()
+            startLocationUpdates()
+        }
+    }
+
+    fun stopUpdatesButtonHandler(view: View) {
+        stopLocationUpdates()
+    }
+
     private fun updateUI(){
+        setButtonsEnabledState()
         mLatitudeText.text = String.format(Locale.TAIWAN, "%s: %f", mLatitudeLabel,
                 mCurrentLocation?.latitude)
         mLongitudeText.text = String.format(Locale.TAIWAN, "%s: %f", mLongitudeLabel,
                 mCurrentLocation?.longitude)
         mLastUpdateTimeText.text = String.format(Locale.TAIWAN, "%s: %s",
                 mLastUpdateTimeLabel, mLastUpdateTime)
+        if (mCurrentLocation == null) return
+        var mLatlng = LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
+        mMap.addMarker(MarkerOptions().position(mLatlng).title("Current Position"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatlng))
+        mMap.setMinZoomPreference(15F)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        var mCurrentLocationLatlng = arrayOf(mCurrentLocation?.latitude, mCurrentLocation?.longitude) as LatLng
-        mMap.addMarker(MarkerOptions().position(mCurrentLocationLatlng).title("Current Position"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(mCurrentLocationLatlng))
     }
 
     private fun showSnackbar(mainTextStringId: Int, actionStringId: Int,
