@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mStartButton :TextView
     private lateinit var mStopButton :TextView
+    private lateinit var mPathway : TextView
 
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
     private var mLocationCallback = LocationCallback()
@@ -66,6 +67,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private var mCurrentLocation : Location? = null
 
+    data class LocationSet(val time : String?, val location :LatLng?)
+
+    var mData : List<LocationSet> = listOf(LocationSet("Current Time", null))
+    private var mShowPathway = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -73,16 +79,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mLatitudeLabel = resources.getString(R.string.latitude_label)
         mLongitudeLabel  = resources.getString(R.string.longitude_label)
         mLastUpdateTimeLabel = resources.getString(R.string.lastUpdateTime_label)
+        lastUpdateTime_text.text = ""
         mLatitudeText = findViewById(R.id.latitude_text)
         mLongitudeText = findViewById(R.id.longitude_text)
         mLastUpdateTimeText = findViewById(R.id.lastUpdateTime_text)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         mSettingsClient = LocationServices.getSettingsClient(this)
-        lastUpdateTime_text.text = ""
         mLastUpdateTime = ""
         mStartButton = findViewById<TextView>(R.id.start) as Button
         mStopButton = findViewById<TextView>(R.id.stop) as Button
-
+        mPathway = findViewById<TextView>(R.id.pathway) as Button
 
         updateValuesFromBundle(savedInstanceState)
         //update UI
@@ -111,6 +117,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onPause(){
         super.onPause()
         stopLocationUpdates()
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        savedInstanceState!!.getBoolean(keyRequestLocationUpdate, mRequestingLocationUpdates)
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -317,6 +328,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (mCurrentLocation == null) return
         val mLatlng = LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
+        mData.plusElement(LocationSet(mLastUpdateTime,mLatlng))
         mMap.addMarker(MarkerOptions().position(mLatlng).title("Current Position $mLastUpdateTimeLabel"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatlng))
         mMap.setMinZoomPreference(15F)
@@ -324,6 +336,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+    }
+
+    fun pathwayHandler(view: View) {
+        val int = Intent(this, ShowDataActivity::class.java)
+        startActivity(int)
     }
 
     private fun showSnackbar(mainTextStringId: Int, actionStringId: Int,
