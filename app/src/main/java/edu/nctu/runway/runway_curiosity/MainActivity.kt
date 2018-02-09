@@ -314,9 +314,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 mCurrentLocation?.longitude)
         mLastUpdateTimeText.text = String.format(Locale.TAIWAN, "%s: %s",
                 mLastUpdateTimeLabel, mLastUpdateTime)
+
         if (mCurrentLocation == null) return
-        var mLatlng = LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
-        mMap.addMarker(MarkerOptions().position(mLatlng).title("Current Position"))
+        val mLatlng = LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
+        mMap.addMarker(MarkerOptions().position(mLatlng).title("Current Position $mLastUpdateTimeLabel"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatlng))
         mMap.setMinZoomPreference(15F)
     }
