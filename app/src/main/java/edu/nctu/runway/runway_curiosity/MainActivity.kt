@@ -340,6 +340,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     fun pathwayHandler(view: View) {
         val int = Intent(this, ShowDataActivity::class.java)
+        int.putExtra("raw data", mData.toString())
         startActivity(int)
     }
 

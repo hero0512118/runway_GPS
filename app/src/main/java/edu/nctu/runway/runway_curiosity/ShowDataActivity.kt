@@ -1,7 +1,9 @@
 package edu.nctu.runway.runway_curiosity
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 
@@ -16,12 +18,9 @@ class ShowDataActivity : AppCompatActivity(){
     private lateinit var mLastUpdateTimeText :TextView
     private lateinit var mDataText : TextView
 
-    private lateinit var mStartButton :TextView
-    private lateinit var mStopButton :TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_showdata)
 
         mLatitudeLabel = resources.getString(R.string.latitude_label)
         mLongitudeLabel  = resources.getString(R.string.longitude_label)
@@ -32,11 +31,12 @@ class ShowDataActivity : AppCompatActivity(){
         mLastUpdateTimeText = findViewById(R.id.lastUpdateTime_text)
         mDataText = findViewById(R.id.data_text)
 
-        mStartButton = findViewById<TextView>(R.id.start) as Button
-        mStopButton = findViewById<TextView>(R.id.stop) as Button
+        mDataText.text = intent.getStringExtra("raw data")
+    }
 
-
-        mDataText.text=""
+    fun pathwayHandler(view: View) {
+        val int = Intent(this, MainActivity::class.java)
+        startActivity(int)
     }
 }
 
