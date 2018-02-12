@@ -12,4 +12,5 @@
     <string name="start_update">Record</string>
     <string name="stop_update">Stop</string>
     <string name="view_record">Pathway</string>
+    <string name="back">BACK</string>
 </resources>
