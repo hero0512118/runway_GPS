@@ -22,7 +22,7 @@ class ShowDataActivity : AppCompatActivity(){
         mDataText = findViewById(R.id.data_text)
 
         mRawData = intent.getStringExtra("raw data")
-        intent.getBooleanExtra("mRequestingLocationUpdates",mRequestingLocationUpdates as Boolean)
+        mRequestingLocationUpdates= intent.getStringExtra("mRequestingLocationUpdates").toBoolean()
 
         var items = mRawData.toString().split("LocationSet") as MutableList
         row("TIME", "LATITUDE", "LONGITUDE")
@@ -52,7 +52,7 @@ class ShowDataActivity : AppCompatActivity(){
 
     fun pathwayHandler(view: View) {
         val int = Intent(this, MainActivity::class.java)
-        int.putExtra("mRequestingLocationUpdates", mRequestingLocationUpdates as Boolean)
+        int.putExtra("mRequestingLocationUpdates", mRequestingLocationUpdates.toString())
         int.putExtra("raw data", mRawData as String)
         startActivity(int)
     }
