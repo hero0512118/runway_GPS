@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mFusedLocationClient : FusedLocationProviderClient
     private var mLocationCallback = LocationCallback()
     private var mLocationRequest = LocationRequest()
-    private var mRequestingLocationUpdates = false
+    private var mRequestingLocationUpdates = true
 
     private lateinit var mLocationSettingsRequest: LocationSettingsRequest
     private lateinit var mSettingsClient: SettingsClient
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     data class LocationSet(val time : String?, val location :LatLng?)
 
-    var mData : List<LocationSet> = listOf(LocationSet("Current Time", null))
+    var mData = mutableListOf(LocationSet("Current Time", null))
     private var mShowPathway = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,6 +102,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         buildLocationSettingsRequest()
     }
 
+    override fun onStart(){
+        super.onStart()
+        mRequestingLocationUpdates = true
+    }
+
     @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
@@ -110,7 +115,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         } else if (!checkPermissions()) {
             requestPermissions()
         }
-
         updateUI()
     }
 
@@ -130,7 +134,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun setLocationRequest(){
-        mLocationRequest.interval = 50000
+        mLocationRequest.interval = 5000
         mLocationRequest.fastestInterval= 1000
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
@@ -326,10 +330,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mLastUpdateTimeText.text = String.format(Locale.TAIWAN, "%s: %s",
                 mLastUpdateTimeLabel, mLastUpdateTime)
 
-        if (mCurrentLocation == null) return
+        if (mCurrentLocation == null){
+            Log.i("Location", "No location is detected")
+            return
+        }
         val mLatlng = LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude)
-        mData.plusElement(LocationSet(mLastUpdateTime,mLatlng))
-        mMap.addMarker(MarkerOptions().position(mLatlng).title("Current Position $mLastUpdateTimeLabel"))
+        mData.add((LocationSet(mLastUpdateTime, mLatlng)))
+        Log.i("Data", "Update succeeded $mLastUpdateTime")
+        mMap.addMarker(MarkerOptions().position(mLatlng).title("$mLastUpdateTime"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(mLatlng))
         mMap.setMinZoomPreference(15F)
     }
