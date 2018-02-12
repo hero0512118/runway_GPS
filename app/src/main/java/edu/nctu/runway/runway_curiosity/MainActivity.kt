@@ -90,6 +90,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mStopButton = findViewById<TextView>(R.id.stop) as Button
         mPathway = findViewById<TextView>(R.id.pathway) as Button
 
+        intent.getBooleanExtra("mRequestingLocationUpdates", mRequestingLocationUpdates)
+
         updateValuesFromBundle(savedInstanceState)
         //update UI
 
@@ -349,6 +351,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     fun pathwayHandler(view: View) {
         val int = Intent(this, ShowDataActivity::class.java)
         int.putExtra("raw data", mData.toString())
+        int.putExtra("mRequestingLocationUpdates", mRequestingLocationUpdates)
         startActivity(int)
     }
 

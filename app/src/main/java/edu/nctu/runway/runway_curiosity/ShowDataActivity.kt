@@ -13,6 +13,7 @@ class ShowDataActivity : AppCompatActivity(){
 
     private lateinit var mDataText : TableLayout
     lateinit var  mRawData : Any
+    lateinit var  mRequestingLocationUpdates : Any
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,8 +22,9 @@ class ShowDataActivity : AppCompatActivity(){
         mDataText = findViewById(R.id.data_text)
 
         mRawData = intent.getStringExtra("raw data")
-        var items = mRawData.toString().split("LocationSet") as MutableList
+        intent.getBooleanExtra("mRequestingLocationUpdates",mRequestingLocationUpdates as Boolean)
 
+        var items = mRawData.toString().split("LocationSet") as MutableList
         row("TIME", "LATITUDE", "LONGITUDE")
         for (i in 0 until items.size-2){
             val timeText = items.last().split(",")[0].split("(time=")[1]
@@ -50,6 +52,8 @@ class ShowDataActivity : AppCompatActivity(){
 
     fun pathwayHandler(view: View) {
         val int = Intent(this, MainActivity::class.java)
+        int.putExtra("mRequestingLocationUpdates", mRequestingLocationUpdates as Boolean)
+        int.putExtra("raw data", mRawData as String)
         startActivity(int)
     }
 }
